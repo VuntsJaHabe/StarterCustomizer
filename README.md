@@ -1,6 +1,6 @@
 # Starter Customizer
 
-Starter Customizer lets each player define their first Pokémon before claiming it through Cobblemon. It targets Java 21, Minecraft 1.21.1, NeoForge 21.1.267 or later, and Cobblemon 1.8.0 or later on that Minecraft version. Install the addon alongside Cobblemon and its matching Kotlin for Forge dependency.
+Starter Customizer lets each player define their first Pokémon before claiming it through Cobblemon. It targets Java 21, Minecraft 1.21.1, NeoForge 21.1.265 or later, and Cobblemon 1.8.0 or later on that Minecraft version. Install the addon alongside Cobblemon and its matching Kotlin for Forge dependency.
 
 ## Choose a starter
 
