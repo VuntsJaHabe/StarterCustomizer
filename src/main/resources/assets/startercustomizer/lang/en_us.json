@@ -1,4 +1,5 @@
 {
   "modmenu.nameTranslation.startercustomizer": "Starter Customizer",
-  "startercustomizer.builder.title": "Build your own starter"
+  "startercustomizer.builder.title": "Build your own starter",
+  "startercustomizer.builder.short_title": "Build starter"
 }
