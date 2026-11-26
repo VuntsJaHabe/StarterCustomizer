@@ -29,9 +29,13 @@ Run `/startercustomizer set eevee nickname=Nova shiny=true` to save a preset for
 
 ## Screenshots
 
-![Starter builder showing Abra beside the training settings](docs/screenshots/starter-builder.png)
+![Build starter button inside Cobblemon’s starter selection screen](docs/screenshots/starter-selection.png)
 
-![Cobblemon party screen showing the claimed shiny Abra and its Adamant nature](docs/screenshots/claimed-starter.png)
+![Shinx in the searchable species picker, sorted by Pokédex number with base stats in the tooltip](docs/screenshots/species-picker.png)
+
+![Shiny Alpha Shinx preview with nickname and other customization settings](docs/screenshots/starter-builder.png)
+
+![The claimed level 100 shiny Alpha Shinx in the party with Adamant nature and Intimidate](docs/screenshots/claimed-starter.png)
 
 ## Supported properties
 
