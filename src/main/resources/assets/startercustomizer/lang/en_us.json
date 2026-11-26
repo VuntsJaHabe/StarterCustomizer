@@ -1,5 +1,10 @@
 {
   "modmenu.nameTranslation.startercustomizer": "Starter Customizer",
   "startercustomizer.builder.title": "Build your own starter",
-  "startercustomizer.builder.short_title": "Build starter"
+  "startercustomizer.builder.short_title": "Build starter",
+  "startercustomizer.sort.name": "Sort: Name A–Z",
+  "startercustomizer.sort.pokedex": "Sort: Pokédex",
+  "startercustomizer.sort.base_stats": "Sort: Base stats",
+  "startercustomizer.sort.tooltip": "Cycle between name A–Z, National Pokédex number and highest base stat total.",
+  "startercustomizer.sort.species_details": "Pokédex %s · Base stat total %s"
 }

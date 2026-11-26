@@ -51,6 +51,7 @@ public final class StarterBuilderScreen extends StarterFrame {
     private final Screen parent;
     private final Map<String, String> values = new LinkedHashMap<>();
     private final Map<String, Component> choiceLabels = new LinkedHashMap<>();
+    private StarterChoices.SpeciesSort speciesSort = StarterChoices.SpeciesSort.NAME;
     private int page;
     private boolean submitting;
     private Component status = Component.empty();
@@ -197,7 +198,8 @@ public final class StarterBuilderScreen extends StarterFrame {
     private void openPicker(Field field) {
         List<StarterChoices.Option> options = StarterChoices.forField(field.key(), values);
         minecraft.setScreen(new StarterOptionScreen(this, Component.literal("Choose " + field.label()), options,
-                preview(), speciesLabel(), field.key().equals("species"), option -> selectOption(field.key(), option)));
+                preview(), speciesLabel(), field.key().equals("species") ? speciesSort : null,
+                option -> selectOption(field.key(), option)));
     }
 
     private void selectOption(String key, StarterChoices.Option option) {
@@ -217,6 +219,10 @@ public final class StarterBuilderScreen extends StarterFrame {
             choiceLabels.put(key, option.label());
         }
         status = Component.empty();
+    }
+
+    void rememberSpeciesSort(StarterChoices.SpeciesSort sort) {
+        speciesSort = sort;
     }
 
     private void clearOption(String key) {

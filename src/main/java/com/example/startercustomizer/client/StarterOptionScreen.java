@@ -7,7 +7,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -18,15 +17,17 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import static com.example.startercustomizer.client.StarterChoices.Option;
+import com.example.startercustomizer.client.StarterChoices.Option;
+import com.example.startercustomizer.client.StarterChoices.SpeciesSort;
 
 final class StarterOptionScreen extends StarterFrame {
-    private final Screen parent;
+    private final StarterBuilderScreen parent;
     private final List<Option> choices;
     private final Consumer<Option> select;
     private final RenderablePokemon selectedPokemon;
     private final Component selectedLabel;
     private final boolean speciesPicker;
+    private SpeciesSort sort;
     private ModelWidget hoverModel;
     private Option hoveredOption;
     private final List<Button> rows = new ArrayList<>();
@@ -36,15 +37,16 @@ final class StarterOptionScreen extends StarterFrame {
     private String query = "";
     private int offset;
 
-    StarterOptionScreen(Screen parent, Component title, List<Option> choices, RenderablePokemon selectedPokemon,
-                        Component selectedLabel, boolean speciesPicker, Consumer<Option> select) {
+    StarterOptionScreen(StarterBuilderScreen parent, Component title, List<Option> choices, RenderablePokemon selectedPokemon,
+                        Component selectedLabel, SpeciesSort sort, Consumer<Option> select) {
         super(title);
         this.parent = parent;
         this.choices = choices;
         this.select = select;
         this.selectedPokemon = selectedPokemon;
         this.selectedLabel = selectedLabel;
-        this.speciesPicker = speciesPicker;
+        this.sort = sort;
+        this.speciesPicker = sort != null;
         this.matches = choices;
     }
 
@@ -76,21 +78,29 @@ final class StarterOptionScreen extends StarterFrame {
                     })));
         }
 
+        if (speciesPicker) {
+            Button sortButton = addRenderableWidget(button(sort.label, left + 13, top + 143, 106, widget -> {
+                sort = sort.next();
+                widget.setMessage(sort.label);
+                filter(query);
+            }));
+            sortButton.setTooltip(Tooltip.create(Component.translatable("startercustomizer.sort.tooltip")));
+        }
         addRenderableWidget(button(Component.literal("Back"), left + 13, top + 180, 106, widget -> onClose()));
         previous = addRenderableWidget(button(Component.literal("<"), left + RIGHT_PANE, top + 180, 22,
                 widget -> scroll(-rows.size())));
         next = addRenderableWidget(button(Component.literal(">"), left + RIGHT_PANE + RIGHT_WIDTH - 22, top + 180, 22,
                 widget -> scroll(rows.size())));
-        updateRows();
+        filter(query);
     }
 
     private void filter(String input) {
         query = input;
         String search = input.strip().toLowerCase(Locale.ROOT);
-        matches = choices.stream()
+        var filtered = choices.stream()
                 .filter(choice -> choice.label().getString().toLowerCase(Locale.ROOT).contains(search)
-                        || choice.id().toLowerCase(Locale.ROOT).contains(search))
-                .toList();
+                        || choice.id().toLowerCase(Locale.ROOT).contains(search));
+        matches = (speciesPicker ? filtered.sorted(sort.order) : filtered).toList();
         offset = 0;
         updateRows();
     }
@@ -109,7 +119,13 @@ final class StarterOptionScreen extends StarterFrame {
             if (row.visible) {
                 Option choice = matches.get(offset + index);
                 row.setMessage(choice.label());
-                row.setTooltip(choice.id().isEmpty() ? null : Tooltip.create(Component.literal(choice.id())));
+                Component tooltip = Component.literal(choice.id());
+                if (speciesPicker) {
+                    String number = choice.pokedexNumber() > 0 ? "#" + choice.pokedexNumber() : "—";
+                    tooltip = Component.translatable("startercustomizer.sort.species_details",
+                            number, choice.baseStatTotal()).append("\n").append(tooltip);
+                }
+                row.setTooltip(choice.id().isEmpty() ? null : Tooltip.create(tooltip));
             }
         }
         previous.active = offset > 0;
@@ -148,7 +164,7 @@ final class StarterOptionScreen extends StarterFrame {
         drawHeading(graphics, title);
         drawPreviewName(graphics, name, 124);
         drawPreviewName(graphics, Component.literal(
-                matches.isEmpty() ? "No matching options" : matches.size() + " options"), 154);
+                matches.isEmpty() ? "No matching options" : matches.size() + " options"), speciesPicker ? 160 : 154);
     }
 
     private void updateHoverModel(Option hovered) {
@@ -168,6 +184,9 @@ final class StarterOptionScreen extends StarterFrame {
 
     @Override
     public void onClose() {
+        if (speciesPicker) {
+            parent.rememberSpeciesSort(sort);
+        }
         minecraft.setScreen(parent);
     }
 

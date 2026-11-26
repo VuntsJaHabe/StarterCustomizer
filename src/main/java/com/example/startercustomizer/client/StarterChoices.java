@@ -4,6 +4,7 @@ import com.cobblemon.mod.common.api.moves.Moves;
 import com.cobblemon.mod.common.api.pokeball.PokeBalls;
 import com.cobblemon.mod.common.api.pokemon.Natures;
 import com.cobblemon.mod.common.api.pokemon.PokemonSpecies;
+import com.cobblemon.mod.common.api.pokemon.stats.Stats;
 import com.cobblemon.mod.common.api.types.tera.TeraTypes;
 import com.cobblemon.mod.common.pokemon.FormData;
 import net.minecraft.network.chat.Component;
@@ -17,6 +18,9 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 final class StarterChoices {
+    private static final Comparator<Option> BY_NAME = Comparator
+            .comparing((Option option) -> option.label().getString().toLowerCase(Locale.ROOT))
+            .thenComparing(Option::id);
     static final Option DEFAULT = new Option("", Component.literal("Default"));
 
     private StarterChoices() {
@@ -54,7 +58,11 @@ final class StarterChoices {
                 if (!id.getNamespace().equals("cobblemon")) {
                     label = label.copy().append(" (" + id.getNamespace() + ")");
                 }
-                return new Option(id.toString(), label);
+                var baseStats = candidate.getStandardForm().getBaseStats();
+                int total = Stats.Companion.getPERMANENT().stream()
+                        .mapToInt(stat -> baseStats.getOrDefault(stat, 0))
+                        .sum();
+                return new Option(id.toString(), label, candidate.getNationalPokedexNumber(), total);
             });
             case "form" -> species == null ? Stream.<Option>empty() : species.getForms().stream()
                     .filter(candidate -> !candidate.formOnlyShowdownId().isEmpty())
@@ -81,7 +89,7 @@ final class StarterChoices {
         };
 
         var sorted = choices.distinct()
-                .sorted(Comparator.comparing(option -> option.label().getString().toLowerCase(Locale.ROOT)))
+                .sorted(BY_NAME)
                 .toList();
         if (key.equals("species")) {
             return sorted;
@@ -94,6 +102,30 @@ final class StarterChoices {
         return Component.literal(text.substring(0, 1).toUpperCase(Locale.ROOT) + text.substring(1));
     }
 
-    record Option(String id, Component label) {
+    enum SpeciesSort {
+        NAME("name", BY_NAME),
+        POKEDEX("pokedex", Comparator.comparingInt(
+                (Option option) -> option.pokedexNumber() > 0 ? option.pokedexNumber() : Integer.MAX_VALUE)
+                .thenComparing(BY_NAME)),
+        BASE_STATS("base_stats", Comparator.comparingInt(Option::baseStatTotal).reversed().thenComparing(BY_NAME));
+
+        final Component label;
+        final Comparator<Option> order;
+
+        SpeciesSort(String key, Comparator<Option> order) {
+            this.label = Component.translatable("startercustomizer.sort." + key);
+            this.order = order;
+        }
+
+        SpeciesSort next() {
+            var modes = values();
+            return modes[(ordinal() + 1) % modes.length];
+        }
+    }
+
+    record Option(String id, Component label, int pokedexNumber, int baseStatTotal) {
+        Option(String id, Component label) {
+            this(id, label, 0, 0);
+        }
     }
 }

@@ -200,3 +200,9 @@ idea {
         downloadJavadoc = true
     }
 }
+
+tasks.named('jar', Jar) {
+    from(['LICENSE', 'TEMPLATE_LICENSE.txt']) {
+        into 'META-INF'
+    }
+}
