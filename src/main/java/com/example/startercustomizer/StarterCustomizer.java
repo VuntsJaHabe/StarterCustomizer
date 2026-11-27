@@ -20,7 +20,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -52,7 +54,8 @@ public class StarterCustomizer {
 
     private final Map<ServerPlayer, PokemonProperties> activeClaims = new HashMap<>();
 
-    public StarterCustomizer(IEventBus modBus) {
+    public StarterCustomizer(IEventBus modBus, ModContainer container) {
+        container.registerConfig(ModConfig.Type.SERVER, StarterServerConfig.SPEC);
         modBus.addListener(this::registerPayloads);
         NeoForge.EVENT_BUS.addListener(this::registerCommands);
         CobblemonEvents.STARTER_CHOSEN.subscribe(Priority.LOWEST, (Consumer<StarterChosenEvent>) this::customize);
